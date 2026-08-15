@@ -7,6 +7,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { getPortfolioPresentation } from "@/lib/portfolioPresentation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -24,6 +25,7 @@ import {
   GitBranch,
   GitPullRequest,
   Github,
+  ImageIcon,
   LayoutDashboard,
   Loader2,
   LockKeyhole,
@@ -34,11 +36,13 @@ import {
   Plus,
   RefreshCw,
   Search,
+  Send,
   ServerCog,
   Settings2,
   ShieldCheck,
   Sparkles,
   TriangleAlert,
+  Video,
   Workflow,
   X,
 } from "lucide-react";
@@ -177,6 +181,9 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <p className="nav-label nav-label-spaced">Signals</p>
         <a className="nav-item" href="#security"><ShieldCheck size={17} /><span>Security</span><b className="nav-risk">63</b></a>
         <a className="nav-item" href="#workflows"><Workflow size={17} /><span>Workflows</span><b>—</b></a>
+        <p className="nav-label nav-label-spaced">Create</p>
+        <a className="nav-item" href="#agent-studio"><Sparkles size={17} /><span>Agent Studio</span><b>AI</b></a>
+        <a className="nav-item" href="#media-workbench"><ImageIcon size={17} /><span>Media</span><b>01</b></a>
       </nav>
 
       <div className="sidebar-bottom">
@@ -209,6 +216,23 @@ export default function Home() {
   const [filter, setFilter] = useState("All");
   const [selectedRepo, setSelectedRepo] = useState("mcp");
   const [syncedAt, setSyncedAt] = useState("just now");
+  const [agentIntent, setAgentIntent] = useState<"repository" | "automation" | "media">("repository");
+  const [agentPrompt, setAgentPrompt] = useState("Review the currently open pull requests and propose the smallest safe next action for each.");
+  const [imagePrompt, setImagePrompt] = useState("An editorial software-agent control room with a calm paper ledger, branching code signals, and lime operational markers.");
+  const portfolioPresentation = getPortfolioPresentation({
+    isLoading: portfolioQuery.isLoading,
+    isFetching: portfolioQuery.isFetching,
+    hasData: Boolean(portfolioQuery.data),
+  });
+
+  const planner = trpc.agent.plan.useMutation({
+    onSuccess: () => toast.success("Reviewable agent plan ready", { description: "No external action was performed." }),
+    onError: (error) => toast.error("Plan could not be generated", { description: error.message }),
+  });
+  const imageMaker = trpc.agent.image.useMutation({
+    onSuccess: () => toast.success("Original workspace visual created", { description: "The generated asset is stored server-side." }),
+    onError: (error) => toast.error("Image could not be created", { description: error.message }),
+  });
 
   const filteredRepos = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -230,6 +254,14 @@ export default function Home() {
   const focusAttention = () => {
     setFilter("Attention");
     document.getElementById("repositories")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const createPlan = () => {
+    void planner.mutateAsync({ intent: agentIntent, prompt: agentPrompt });
+  };
+
+  const createImage = () => {
+    void imageMaker.mutateAsync({ prompt: imagePrompt });
   };
 
   if (loading) {
@@ -265,7 +297,7 @@ export default function Home() {
         <header className="topbar">
           <div className="breadcrumbs"><span>Private workspace</span><span>/</span><strong>GitHub cockpit</strong></div>
           <div className="topbar-actions">
-            <span className="sync-note"><span className="sync-dot" /> {portfolioQuery.data ? "Live public register" : "Snapshot fallback"} · {syncedAt}</span>
+            <span className="sync-note"><span className="sync-dot" /> {portfolioPresentation.topbarLabel} · {syncedAt}</span>
             <button className="button button-ghost" onClick={refresh}><RefreshCw size={15} />Refresh</button>
             <button className="icon-button" onClick={() => void logout()} aria-label="Sign out"><LogOut size={16} /></button>
             <button className="icon-button" aria-label="More workspace options"><MoreHorizontal size={18} /></button>
@@ -304,7 +336,7 @@ export default function Home() {
           <section className="live-register-section" id="live-register" aria-labelledby="live-register-title">
             <div className="section-heading repository-heading">
               <div><p className="panel-kicker">Free-first live register</p><h2 id="live-register-title">Public GitHub evidence, server-side</h2></div>
-              <span className={`live-state ${portfolioQuery.data ? "is-live" : ""}`}>{portfolioQuery.isFetching ? "Refreshing" : portfolioQuery.data ? "Live" : "Snapshot"}</span>
+              <span className={`live-state ${portfolioPresentation.isLive ? "is-live" : ""}`}>{portfolioPresentation.badgeLabel}</span>
             </div>
             <p className="live-register-intro">This register reads the owner’s public repository metadata through the server. It opens GitHub for every consequential action; it does not write, merge, retry, or store a GitHub credential.</p>
 
@@ -343,6 +375,36 @@ export default function Home() {
                 </div>
               </>
             ) : null}
+          </section>
+
+          <section className="agent-studio" id="agent-studio" aria-labelledby="agent-studio-title">
+            <div className="agent-studio-intro">
+              <p className="panel-kicker">Hybrid agent desk</p>
+              <h2 id="agent-studio-title">Reason in the app.<br /><i>Review in GitHub.</i></h2>
+              <p>Use on-demand planning for code, automation, or media work. Plans are bounded to inspection, drafts, and review steps; repository writes remain a deliberate GitHub action.</p>
+              <div className="agent-boundaries"><span><ShieldCheck size={14} /> no automatic merges</span><span><GitPullRequest size={14} /> PR-based delivery</span><span><Workflow size={14} /> deterministic checks first</span></div>
+            </div>
+            <div className="agent-workbench">
+              <div className="agent-mode-tabs" role="group" aria-label="Agent plan type">
+                {(["repository", "automation", "media"] as const).map((intent) => <button key={intent} className={agentIntent === intent ? "is-active" : ""} onClick={() => setAgentIntent(intent)}>{intent}</button>)}
+              </div>
+              <label className="agent-prompt-label" htmlFor="agent-prompt">What should the agent prepare?</label>
+              <textarea id="agent-prompt" value={agentPrompt} onChange={(event) => setAgentPrompt(event.target.value)} maxLength={1500} />
+              <div className="agent-workbench-actions"><span>{agentPrompt.length}/1500</span><button className="button button-primary" disabled={planner.isPending || agentPrompt.trim().length < 12} onClick={createPlan}>{planner.isPending ? <Loader2 className="animate-spin" size={15} /> : <Send size={15} />}{planner.isPending ? "Planning" : "Generate safe plan"}</button></div>
+              {planner.data ? <article className="agent-plan-result"><div><span className="signal-label"><span className="signal-dot lime" /> plan ready</span><strong>{planner.data.title}</strong><p>{planner.data.summary}</p></div><ol>{planner.data.steps.map((step, index) => <li key={`${step.title}-${index}`}><b>{String(index + 1).padStart(2, "0")}</b><div><span>{step.mode}</span><strong>{step.title}</strong><p>{step.detail}</p></div></li>)}</ol><div className="agent-guardrails"><span>Guardrails</span>{planner.data.guardrails.map((rule) => <em key={rule}>{rule}</em>)}</div></article> : null}
+            </div>
+          </section>
+
+          <section className="media-workbench" id="media-workbench" aria-labelledby="media-workbench-title">
+            <div><p className="panel-kicker">Media studio</p><h2 id="media-workbench-title">Create a visual.<br /><i>Prepare the motion brief.</i></h2><p>Image work is an authenticated on-demand server action. Video briefs become structured shot plans until a separately approved video provider is connected.</p></div>
+            <div className="media-tools">
+              <div className="media-tool-card">
+                <ImageIcon size={19} /><div><strong>Original image</strong><span>Generate a workspace visual without putting a key in the browser.</span></div>
+                <label className="sr-only" htmlFor="image-prompt">Image request</label><input id="image-prompt" value={imagePrompt} onChange={(event) => setImagePrompt(event.target.value)} maxLength={700} /><button className="button button-dark" disabled={imageMaker.isPending || imagePrompt.trim().length < 12} onClick={createImage}>{imageMaker.isPending ? <Loader2 className="animate-spin" size={15} /> : <Sparkles size={15} />}{imageMaker.isPending ? "Creating" : "Create image"}</button>
+                {imageMaker.data?.url ? <a className="media-image-result" href={imageMaker.data.url} target="_blank" rel="noreferrer"><img src={imageMaker.data.url} alt="Generated agent workspace visual" /><span>Open generated image <ArrowUpRight size={13} /></span></a> : null}
+              </div>
+              <div className="media-tool-card is-muted"><Video size={19} /><div><strong>Video shot plan</strong><span>Turn a video request into a reviewable production brief before a provider is connected.</span></div><button className="button button-ghost" onClick={() => { setAgentIntent("media"); setAgentPrompt("Create a production-ready video shot plan for: "); document.getElementById("agent-studio")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>Prepare video plan <ArrowUpRight size={15} /></button></div>
+            </div>
           </section>
 
           <section className="overview-grid">
@@ -401,8 +463,8 @@ export default function Home() {
           <section className="provider-studio" id="settings" aria-labelledby="provider-studio-title">
             <div><p className="panel-kicker">Provider studio</p><h2 id="provider-studio-title">Connect later, never pretend now.</h2><p>Free-first mode keeps third-party model, image, and video credentials out of this application. The controls below are deliberate readiness states, not inactive promises.</p></div>
             <div className="provider-grid">
-              <div><Sparkles size={18} /><strong>AI composition</strong><span>Requires a server-side model connection before chat or code generation is enabled.</span></div>
-              <div><ServerCog size={18} /><strong>Image & video work</strong><span>Requires a separately approved generation provider; no key is stored in the client.</span></div>
+              <div><Sparkles size={18} /><strong>AI composition</strong><span>Enabled for authenticated, on-demand safe plans using the server-side model boundary.</span></div>
+              <div><ServerCog size={18} /><strong>Image & video work</strong><span>Image creation is available on demand; rendered video still needs a separately approved provider.</span></div>
               <div><ShieldCheck size={18} /><strong>Repository writes</strong><span>Remain GitHub-reviewable until a dedicated owner token and approval policy are added.</span></div>
             </div>
           </section>
