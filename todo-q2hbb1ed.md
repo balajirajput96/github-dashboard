@@ -21,6 +21,10 @@
 - [x] Align daily GitHub/Jules progress summary to 09:30 AM IST so it runs after the scheduled Jules window.
 - [x] Sync the retained-schedule verification documentation checkpoint to the private GitHub repository.
 - [x] Require the next 09:30 AM IST daily report to capture visible evidence of the first retained Jules execution.
+- [x] Record managed-preview evidence that the authenticated live register renders portfolio data rather than a fallback.
+- [x] Distinguish a pending live-register query from a true snapshot fallback in the cockpit status indicators.
+- [x] Add automated authenticated-caller coverage for the live portfolio procedure with a successful GitHub public-data response.
+- [ ] Sync the current hybrid-agent, live-register, tests, and verification records to the private GitHub repository.
 
 ## Antigravity and AI-agent application program
 
