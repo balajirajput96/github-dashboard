@@ -15,7 +15,9 @@
 - [x] Produce a risk-ranked repair backlog with repository-specific scope.
 - [x] Implement and validate the highest-priority safe fixes.
 - [x] Configure recurring progress updates and document constraints.
-- [ ] Verify the first Jules scheduled execution after its next daily run.
+- [ ] Verify the first Jules scheduled execution after the retained 09:00 AM IST daily run and capture its outcome.
+- [x] Align daily GitHub/Jules progress summary to 09:30 AM IST so it runs after the scheduled Jules window.
+- [ ] Sync the retained-schedule verification documentation checkpoint to the private GitHub repository.
 
 ## Antigravity and AI-agent application program
 
@@ -26,7 +28,7 @@
 - [x] Define the AI-agent product boundary, ownership rules, model/API strategy, and deployment architecture.
 - [x] Audit directly owned repositories and license-compatible public references for reusable patterns, recording sources, licenses, and reuse boundaries.
 - [x] Implement the clickable free-first cockpit application with secure backend integrations.
-- [ ] Validate production deployment, GitHub synchronization, and approved recurring operations.
+- [x] Validate production deployment, GitHub synchronization, CI, and approved recurring operations.
 
 ### Selected delivery: free-first private cockpit
 
