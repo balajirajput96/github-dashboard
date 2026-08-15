@@ -18,6 +18,7 @@
 - [ ] Verify the first Jules scheduled execution after the retained 09:00 AM IST daily run and capture its outcome.
 - [x] Align daily GitHub/Jules progress summary to 09:30 AM IST so it runs after the scheduled Jules window.
 - [x] Sync the retained-schedule verification documentation checkpoint to the private GitHub repository.
+- [x] Require the next 09:30 AM IST daily report to capture visible evidence of the first retained Jules execution.
 
 ## Antigravity and AI-agent application program
 
