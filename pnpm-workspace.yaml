@@ -10,11 +10,15 @@ overrides:
   "dompurify@<=3.4.12": ">=3.4.13"
   "drizzle-orm": "0.45.2"
   "fast-xml-parser@<5.7.0": ">=5.7.0"
+  "lodash": "4.18.1"
+  "lodash-es": "4.18.1"
+  "mdast-util-to-hast": "13.2.1"
   "mermaid@>=11.0.0-alpha.1 <11.16.1": ">=11.16.1"
   "nanoid": "5.1.16"
   "path-to-regexp@<0.1.13": "0.1.13"
   "qs@>=6.11.1 <=6.15.1": ">=6.15.2"
   "tailwindcss>nanoid": "3.3.7"
+  "uuid": "14.0.1"
 
 patchedDependencies:
   wouter@3.7.1: patches/wouter@3.7.1.patch
